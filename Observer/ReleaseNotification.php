@@ -23,12 +23,13 @@ class ReleaseNotification implements ObserverInterface
 {
     const MODULE_NAME = 'Celebros_Celexport';
     const GITHUB_API_RELEASE_LINK = 'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases/latest';
-    const CACHE_NOTIFICATION_PATH = 'Celebros_Celexport_Last_Release';
+    const CACHE_POSTFIX = '_Last_Release';
     
     protected $githubApi = [
         'Celebros_ConversionPro' => 'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases/latest',
         'Celebros_Celexport' => 'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases/latest',
-        'Celebros_AutoComplete' => 'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases/latest'
+        'Celebros_AutoComplete' => 'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases/latest',
+        'Celebros_Main' => 'https://api.github.com/repos/devbelvg/M2_Main/releases/latest'
     ];
     
     /**
@@ -65,7 +66,7 @@ class ReleaseNotification implements ObserverInterface
         $newNotification = true;
         $version = $this->getLatestRelease($this->githubApi[$module['name']]);
         $text = 'Celebros is regularly releasing new versions of our Magento extensions to add more features, fix bugs, or to be compatible with the new Magento version. Therefore, you also have to update Magento extensions on your site to the most recent version.';
-        /*if ($version) {
+        if ($version) {
             $notification = $this->_notification->getCollection()->addFieldToFilter('url', $this->lRelease->html_url)->getLastItem();
             if ($notification->getNotificationId()) {
                 $newNotification = false;
@@ -73,13 +74,16 @@ class ReleaseNotification implements ObserverInterface
                     $newNotification = true;
                 }
             }
-        }*/
+        }
         
-        if ($newNotification && $version && !version_compare($module['setup_version'], $version, '=')) {
-            $this->_notification->addCritical($this->lRelease->body . ' is available', $text, $this->lRelease->html_url);
-            $this->cache->save((string)$version, $module['name'] . '_Last_Release');
+        if ($version && !version_compare($module['setup_version'], $version, '=')) {
+            if ($newNotification) {
+                $this->_notification->addCritical($this->lRelease->body . ' is available', $text, $this->lRelease->html_url);
+            }
+            
+            $this->cache->save((string)$version, $module['name'] . self::CACHE_POSTFIX);
         } else {
-            $this->cache->remove($module['name'] . '_Last_Release');
+            $this->cache->remove($module['name'] . self::CACHE_POSTFIX);
         } 
     }
     
@@ -103,7 +107,7 @@ class ReleaseNotification implements ObserverInterface
                 'timeout'   => 8
             ]);
 
-            $headers = ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0'];
+            $headers = ['User-Agent' => 'CelebrosLtd'];
             $curlClient->connect(
                 $uri->getHost(),
                 $uri->getPort()
