@@ -67,11 +67,16 @@ class ReleaseNotification implements ObserverInterface
         $version = $this->getLatestRelease($this->githubApi[$module['name']]);
         $text = 'Celebros is regularly releasing new versions of our Magento extensions to add more features, fix bugs, or to be compatible with the new Magento version. Therefore, you also have to update Magento extensions on your site to the most recent version.';
         if ($version) {
-            $notification = $this->_notification->getCollection()->addFieldToFilter('url', $this->lRelease->html_url)->getLastItem();
-            if ($notification->getNotificationId()) {
-                $newNotification = false;
-                if ($notification->getIsRemove() == 1) {
-                    $newNotification = true;
+            $notifications = $this->_notification
+                ->getCollection()
+                ->addFieldToFilter('url', $this->lRelease->html_url)
+                ->addFieldToFilter('is_remove', 0);
+                
+            foreach ($notifications as $notification) {
+                if ($notification->getNotificationId()) {
+                    //if ($notification->getIsRemove() != 1) {
+                        $newNotification = false;
+                    //}
                 }
             }
         }
