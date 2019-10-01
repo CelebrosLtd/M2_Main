@@ -10,7 +10,9 @@
  ******************************************************************************
  * @category    Celebros
  * @package     Celebros_Main
- -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="Celebros_Main" setup_version="0.9.4" />
-</config>
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Celebros_Main::css/celebros-conf.css"/>
+    </head>
+</page>
