@@ -21,16 +21,17 @@ use Zend\Uri\Http as HttpUri;
 
 class ReleaseNotification implements ObserverInterface
 {
-    const MODULE_NAME = 'Celebros_Celexport';
-    const GITHUB_API_RELEASE_LINK = 'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases/latest';
+    const MODULE_NAME = 'Celebros_Main';
     const CACHE_POSTFIX = '_Last_Release';
+    const NOTIFICATION_TEXT = 'Celebros is regularly releasing new versions of our Magento extensions to add more features, fix bugs, or to be compatible with the new Magento version. Therefore, you also have to update Magento extensions on your site to the most recent version.';
     
-    protected $githubApi = [
-        'Celebros_ConversionPro' => 'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases/latest',
-        'Celebros_Celexport' => 'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases/latest',
-        'Celebros_AutoComplete' => 'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases/latest',
-        'Celebros_Main' => 'https://api.github.com/repos/devbelvg/M2_Main/releases/latest'
-    ];
+    public $helper;
+    public $cache;
+    public $json;
+    
+    protected $_notification;
+    protected $_moduleDb;
+    protected $githubApi;
     
     /**
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
@@ -39,14 +40,17 @@ class ReleaseNotification implements ObserverInterface
         \Celebros\Main\Helper\Data $helper,
         \Magento\Framework\Module\ResourceInterface $moduleDb,
         \Magento\AdminNotification\Model\Inbox $notification,
-        \Magento\Framework\App\CacheInterface $cache
+        \Magento\Framework\App\CacheInterface $cache,
+        \Magento\Framework\Json\Helper\Data $json
     ) {
         $this->helper = $helper;
         $this->_notification = $notification;
         $this->_moduleDb = $moduleDb;
         $this->cache = $cache;
+        $this->json = $json;
+        $this->githubApi = $this->helper->getGithubApi();
     }
-
+    
     /**
      * @param \Magento\Framework\Event\Observer $observer
      * @return void
@@ -64,12 +68,12 @@ class ReleaseNotification implements ObserverInterface
     public function checkNewRelease($module)
     {
         $newNotification = true;
-        $version = $this->getLatestRelease($this->githubApi[$module['name']]);
-        $text = 'Celebros is regularly releasing new versions of our Magento extensions to add more features, fix bugs, or to be compatible with the new Magento version. Therefore, you also have to update Magento extensions on your site to the most recent version.';
+        $version = $this->helper->getLatestRelease($this->githubApi[$module['name']]);
+        $text = __(self::NOTIFICATION_TEXT);
         if ($version) {
             $notifications = $this->_notification
                 ->getCollection()
-                ->addFieldToFilter('url', $this->lRelease->html_url)
+                ->addFieldToFilter('url', $this->helper->lRelease->html_url)
                 ->addFieldToFilter('is_remove', 0);
                 
             foreach ($notifications as $notification) {
@@ -83,7 +87,7 @@ class ReleaseNotification implements ObserverInterface
         
         if ($version && !version_compare($module['setup_version'], $version, '=')) {
             if ($newNotification) {
-                $this->_notification->addCritical($this->lRelease->body . ' is available', $text, $this->lRelease->html_url);
+                $this->_notification->addCritical($this->helper->lRelease->body . ' is available', $text, $this->helper->lRelease->html_url);
             }
             
             $this->cache->save((string)$version, $module['name'] . self::CACHE_POSTFIX);
@@ -104,14 +108,14 @@ class ReleaseNotification implements ObserverInterface
         try {
             $curlClient = new Curl();
             if (!$location) {
-                $location = self::GITHUB_API_RELEASE_LINK;
+                return false;
             }
             
             $uri = new HttpUri($location);
             $curlClient->setOptions([
                 'timeout'   => 8
             ]);
-
+            
             $headers = ['User-Agent' => 'CelebrosLtd'];
             $curlClient->connect(
                 $uri->getHost(),
@@ -121,14 +125,14 @@ class ReleaseNotification implements ObserverInterface
             $curlClient->write('GET', $uri, 1.0, $headers);
             $data = HttpResponse::fromString($curlClient->read());
             $curlClient->close();
-
-            $this->lRelease = json_decode($data->getContent());          
-
+            
+            $this->lRelease = json_decode($data->getContent());
+            
             $version = $this->lRelease->tag_name;
         } catch (\Exception $e) {
             return false;
         }
-
+        
         return $version;
     }
 }
