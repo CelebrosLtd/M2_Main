@@ -28,7 +28,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         'celebros/module-celexport' => 'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases/latest',
         'celebros/module-autocomplete' => 'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases/latest',
         'celebros/module-main' => 'https://api.github.com/repos/devbelvg/M2_Main/releases/latest',
-        'celebros/module-conversionpro-embedded' => 'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases/latest'
+        'celebros/module-conversionpro-embedded' => 'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases/latest',
+        'celebros/module-crosssell' => 'https://api.github.com/repos/devbelvg/M2_Celebros_Crosssell/releases/latest'
     ];
     
     public function __construct(
