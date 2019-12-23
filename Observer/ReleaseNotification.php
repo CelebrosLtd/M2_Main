@@ -68,6 +68,7 @@ class ReleaseNotification implements ObserverInterface
     public function checkNewRelease($module)
     {
         $newNotification = true;
+        $this->helper->collectNewReleases($module['name']);
         $version = $this->helper->getLatestRelease($this->githubApi[$module['name']]);
         $text = __(self::NOTIFICATION_TEXT);
         if ($version) {

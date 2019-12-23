@@ -11,3 +11,126 @@
     background: url(../images/celebros-main-tab-logo.png) no-repeat;
     padding-left: 28px;
 }
+.release-item.current {
+    font-weight: bold;
+    border-bottom: 1px solid grey;
+}
+.release-item .github-link {
+    margin-left: 30px;
+    display: inline-block;
+}
+.release-item .github-link:before {
+    font-family: 'Admin Icons';
+    color: #41362f;
+    content: '\e636';
+
+    left: 1.1rem;
+    margin-top: -1.1rem;
+    top: 50%;
+}
+.release-item .github-link span {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+.release-item .release-status {
+    margin-left: 10px;
+    display: inline-block;
+    width: 60px;
+}
+.release-item .release-status:before {
+    font-family: 'Admin Icons';
+    left: 1.1rem;
+    margin-top: -1.1rem;
+    top: 50%;   
+}
+.release-item .release-status span {
+    margin-left: 6px;
+}
+.release-item .release-status.major span {
+    color: #c00000;
+}
+.release-item .release-status.critical span {
+    color: #d00000;
+    font-weight: bold;
+}
+.release-item .release-status.normal span {
+    color: #005000;
+}
+.release-item .release-status.minor span {
+    color: #000070;
+}
+.release-item .release-status.current:before {
+    content: '\e62d';
+    color: #41362f;
+}
+.release-item .release-status.critical:before {
+    content: '\e623';
+    color: red;
+}
+.release-item .release-status.major:before {
+    content: '\e614';
+    color: red;
+}
+.release-item .release-status.normal:before {
+    content: '\e614';
+    color: green;
+}
+.release-item .release-status.minor:before {
+    content: '\e614';
+    color: blue;
+}
+.release-item {
+    padding: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #fafafa;
+    margin: 2px;
+    min-width: 360px;
+}
+.release-item.installed {
+    border: 1px solid #e0e0e0;
+    background-color: #eaeaea;
+}
+.release-item.hidden {
+    display: none;
+}
+.release-item.expand {
+    cursor: pointer;
+}
+.release-item.expand span:before {
+    font-family: 'Admin Icons';
+    content: '\e628';
+    color: #888888;
+    margin-right: 5px;
+}
+
+.accordion .config .value {
+    width: auto;
+}
+
+.release-item.installed > div {
+    width: 44px;
+    display: inline-block;
+}
+
+.release-item.expand > div {
+    width: 20px;
+    display: inline-block;
+}
+
+.release-item > div {
+    width: 46px;
+    display: inline-block;
+}
+
+.release-item .release-comment {
+    margin-left:20px;
+    display:inline-block;
+    width: auto;
+}
