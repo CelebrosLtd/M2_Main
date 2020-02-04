@@ -91,15 +91,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function collectNewReleases($packageName)
     {
         $cVersion = $this->getCurrentVersion($packageName);
-        //print_r($cVersion); die;
         $location = isset($this->githubApi[$packageName]) ? (string)$this->githubApi[$packageName] : null;
-        //echo '<pre>';
         if ($location) {
             $data = json_decode($this->getData($location));
-            //echo '<pre>';
             $newReleases = [];
             foreach ((array)$data as $release) {
-                if (version_compare($release->tag_name, $cVersion, '>')) {
+                if (is_object($release) 
+                && version_compare($release->tag_name, $cVersion, '>')) {
                     $newReleases[$release->tag_name] = [
                         'url' => $release->html_url,
                         'version' => $release->tag_name,
