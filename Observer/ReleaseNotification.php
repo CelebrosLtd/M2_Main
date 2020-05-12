@@ -32,6 +32,9 @@ class ReleaseNotification implements ObserverInterface
     protected $_notification;
     protected $_moduleDb;
     protected $githubApi;
+    protected $_releaseDescrRSymbols = [
+        "-----", "["
+    ];
     
     /**
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
@@ -65,6 +68,17 @@ class ReleaseNotification implements ObserverInterface
         }
     }
     
+    public function extractReleaseShortDescription(string $releaseBody) : string
+    {
+        foreach ($this->_releaseDescrRSymbols as $symb) {
+            if (strpos($releaseBody, $symb) !== false) {
+                $releaseBody = substr($releaseBody, 0, strpos($releaseBody, $symb));
+            }
+        }
+
+        return $releaseBody;
+    }   
+    
     public function checkNewRelease($module)
     {
         $newNotification = true;
@@ -85,10 +99,14 @@ class ReleaseNotification implements ObserverInterface
                 }
             }
         }
-        
+       
         if ($version && !version_compare($module['setup_version'], $version, '=')) {
             if ($newNotification) {
-                $this->_notification->addCritical($this->helper->lRelease->body . ' is available', $text, $this->helper->lRelease->html_url);
+                $this->_notification->addCritical(
+                    $this->extractReleaseShortDescription($this->helper->lRelease->body) . ' is available',
+                    $text,
+                    $this->helper->lRelease->html_url
+                );
             }
             
             $this->cache->save((string)$version, $module['name'] . self::CACHE_POSTFIX);
