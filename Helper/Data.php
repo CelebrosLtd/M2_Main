@@ -36,10 +36,26 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         'celebros/module-autocomplete' => 'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases',
         'celebros/module-main' => 'https://api.github.com/repos/devbelvg/M2_Main/releases',
         'celebros/module-conversionpro-embedded' => 'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases',
-        'celebros/module-crosssell' => 'https://api.github.com/repos/devbelvg/M2_Celebros_Crosssell/releases'
+        'celebros/module-crosssell' => 'https://api.github.com/repos/devbelvg/M2_Celebros_Crosssell/releases',
+        'celebros/module-sorting' => 'https://api.github.com/repos/CelebrosLtd/M2_Celebros_Sorting/releases',
+        'celebros/module-conflictfixer' => 'https://api.github.com/repos/CelebrosLtd/Celebros_ConflictFixer/releases'
     ];
     
     protected $celebrosModules = [];
+    
+    protected $cspXmlPaths = [
+        \Celebros\AutoComplete\Helper\Data::XML_PATH_SCRIPT_SERVER_ADDRESS => ['script-src', 'style-src'],
+        \Celebros\AutoComplete\Helper\Data::XML_PATH_FRONTEND_SERVER_ADDRESS => 'font-src',
+        \Celebros\ConversionPro\Helper\Data::XML_PATH_ANALYTICS_HOST => 'script-src'
+    ];
+    
+    protected $cspUrls = [
+        'ajax.googleapis.com' => 'script-src',
+        '*.celebros.com' => ['script-src', 'connect-src'],
+        '*.celebros.com:446' => 'connect-src',
+        '*.celebros-analytics.com' => 'connect-src',
+        'celebrosnlp.com' => 'img-src'
+    ];
     
     public function __construct(
         Context $context,
@@ -184,6 +200,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return $data->getContent();
         } catch (\Exception $e) {
             return false;
+        }
+    }
+    
+    public function collectCSPUrls($store = null) : array
+    {
+        $urls = [];
+        foreach ($this->cspXmlPaths as $xmlPath => $type) {
+            if ($url = $this->scopeConfig->getValue(
+                $xmlPath,
+                ScopeInterface::SCOPE_STORE,
+                $store
+            )) {
+                $this->fillSCPUrls($urls, $type, $url);
+            }
+        }
+        
+        foreach ($this->cspUrls as $url => $type) {
+            $this->fillSCPUrls($urls, $type, $url);
+        }
+//print_r($urls);die;       
+        return $urls;
+    }
+    
+    protected function fillSCPUrls(&$urls, $type, $url)
+    {
+        if (is_array($type)) {
+            foreach ($type as $t) {
+                $urls[$t][] = $url;
+            }        
+        } else {
+            $urls[$type][] = $url;
         }
     }
 }
