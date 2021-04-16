@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Celebros
  *
@@ -7,10 +8,11 @@
  * Do not edit or add to this file if you wish correct extension functionality.
  * If you wish to customize it, please contact Celebros.
  *
- ******************************************************************************
+ * *****************************************************************************
  * @category    Celebros
  * @package     Celebros_Main
  */
+
 namespace Celebros\Main\Helper;
 
 use Magento\Framework\App\Helper\Context;
@@ -29,26 +31,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         'Normal',
         'Minor'
     ];
-    
+
     protected $githubApi = [
-        'celebros/module-conversionpro' => 'https://api.github.com/repos/CelebrosLtd/M2_ConversionPro/releases',
-        'celebros/module-celexport' => 'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases',
-        'celebros/module-autocomplete' => 'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases',
-        'celebros/module-main' => 'https://api.github.com/repos/devbelvg/M2_Main/releases',
-        'celebros/module-conversionpro-embedded' => 'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases',
-        'celebros/module-crosssell' => 'https://api.github.com/repos/devbelvg/M2_Celebros_Crosssell/releases',
-        'celebros/module-sorting' => 'https://api.github.com/repos/CelebrosLtd/M2_Celebros_Sorting/releases',
-        'celebros/module-conflictfixer' => 'https://api.github.com/repos/CelebrosLtd/Celebros_ConflictFixer/releases'
+        'celebros/module-conversionpro' =>
+            'https://api.github.com/repos/CelebrosLtd/M2_ConversionPro/releases',
+        'celebros/module-celexport' =>
+            'https://api.github.com/repos/CelebrosLtd/M2_Celexport/releases',
+        'celebros/module-autocomplete' =>
+            'https://api.github.com/repos/CelebrosLtd/M2_AutoComplete/releases',
+        'celebros/module-main' =>
+            'https://api.github.com/repos/devbelvg/M2_Main/releases',
+        'celebros/module-conversionpro-embedded' =>
+            'https://api.github.com/repos/devbelvg/M2_ConversionPro_Embedded/releases',
+        'celebros/module-crosssell' =>
+            'https://api.github.com/repos/devbelvg/M2_Celebros_Crosssell/releases',
+        'celebros/module-sorting' =>
+            'https://api.github.com/repos/CelebrosLtd/M2_Celebros_Sorting/releases',
+        'celebros/module-conflictfixer' =>
+            'https://api.github.com/repos/CelebrosLtd/Celebros_ConflictFixer/releases'
     ];
-    
+
     protected $celebrosModules = [];
-    
+
     protected $cspXmlPaths = [
         \Celebros\AutoComplete\Helper\Data::XML_PATH_SCRIPT_SERVER_ADDRESS => ['script-src', 'style-src'],
         \Celebros\AutoComplete\Helper\Data::XML_PATH_FRONTEND_SERVER_ADDRESS => 'font-src',
         \Celebros\ConversionPro\Helper\Data::XML_PATH_ANALYTICS_HOST => 'script-src'
     ];
-    
+
     protected $cspUrls = [
         'ajax.googleapis.com' => 'script-src',
         '*.celebros.com' => ['script-src', 'connect-src'],
@@ -56,7 +66,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         '*.celebros-analytics.com' => 'connect-src',
         'celebrosnlp.com' => 'img-src'
     ];
-    
+
     public function __construct(
         Context $context,
         \Magento\Framework\App\CacheInterface $cache,
@@ -68,7 +78,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->jsonHelper = $jsonHelper;
         parent::__construct($context);
     }
-    
+
     public function getCelebrosModules()
     {
         if (empty($this->celebrosModules)) {
@@ -81,29 +91,29 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                             'name' => $moduleData['name'],
                             'setup_version' => $moduleData['version']
                         ];
-                        
+
                         $result[$moduleData['name']] = $item;
                     }
                 }
             }
-            
+
             $this->celebrosModules = $result;
         }
-        
+
         return $this->celebrosModules;
     }
-    
+
     public function getCurrentVersion($packageName)
     {
         $modules = $this->getCelebrosModules();
         return isset($modules[$packageName]) ? $modules[$packageName]['setup_version'] : null;
     }
-    
+
     public function getGithubApi()
     {
         return $this->githubApi;
     }
-    
+
     public function collectNewReleases($packageName)
     {
         $cVersion = $this->getCurrentVersion($packageName);
@@ -112,8 +122,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $data = json_decode($this->getData($location));
             $newReleases = [];
             foreach ((array)$data as $release) {
-                if (is_object($release) 
-                && version_compare($release->tag_name, $cVersion, '>')) {
+                if (is_object($release)
+                    && version_compare($release->tag_name, $cVersion, '>')
+                ) {
                     $newReleases[$release->tag_name] = [
                         'url' => $release->html_url,
                         'version' => $release->tag_name,
@@ -123,17 +134,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     ];
                 }
             }
-            
+
             if (!empty($newReleases)) {
                 $cacheData = (string)json_encode($newReleases);
             } else {
                 $cacheData =  false;
             }
-            
+
             $this->cache->save($cacheData, $packageName . '_releases');
         }
     }
-    
+
     protected function _extractRelStatus($string)
     {
         foreach ($this->releaseStatuses as $status) {
@@ -141,43 +152,43 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 return $status;
             }
         }
-        
+
         return $this->releaseStatuses[2];
     }
-    
+
     public function getLatestRelease($location = null)
     {
         $version = null;
         try {
             $curlClient = new Curl();
-            
+
             $location .= '/latest';
-            
+
             $uri = new HttpUri($location);
             $curlClient->setOptions([
                 'timeout'   => 8
             ]);
-            
+
             $headers = ['User-Agent' => 'CelebrosLtd'];
             $curlClient->connect(
                 $uri->getHost(),
                 $uri->getPort()
             );
-            
+
             $curlClient->write('GET', $uri, 1.0, $headers);
             $data = HttpResponse::fromString($curlClient->read());
             $curlClient->close();
-            
-            $this->lRelease = json_decode($data->getContent());          
-            
+
+            $this->lRelease = json_decode($data->getContent());
+
             $version = $this->lRelease->tag_name;
         } catch (\Exception $e) {
             return false;
         }
-        
+
         return $version;
     }
-    
+
     protected function getData($location)
     {
         try {
@@ -186,24 +197,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $curlClient->setOptions([
                 'timeout'   => 8
             ]);
-            
+
             $headers = ['User-Agent' => 'CelebrosLtd'];
             $curlClient->connect(
                 $uri->getHost(),
                 $uri->getPort()
             );
-            
+
             $curlClient->write('GET', $uri, 1.0, $headers);
             $data = HttpResponse::fromString($curlClient->read());
             $curlClient->close();
-            
+
             return $data->getContent();
         } catch (\Exception $e) {
             return false;
         }
     }
-    
-    public function collectCSPUrls($store = null) : array
+
+    public function collectCSPUrls($store = null): array
     {
         $urls = [];
         foreach ($this->cspXmlPaths as $xmlPath => $type) {
@@ -215,20 +226,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $this->fillSCPUrls($urls, $type, $url);
             }
         }
-        
+
         foreach ($this->cspUrls as $url => $type) {
             $this->fillSCPUrls($urls, $type, $url);
         }
-//print_r($urls);die;       
+
         return $urls;
     }
-    
+
     protected function fillSCPUrls(&$urls, $type, $url)
     {
         if (is_array($type)) {
             foreach ($type as $t) {
                 $urls[$t][] = $url;
-            }        
+            }
         } else {
             $urls[$type][] = $url;
         }

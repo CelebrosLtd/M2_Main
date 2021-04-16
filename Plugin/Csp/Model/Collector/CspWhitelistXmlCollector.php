@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Celebros
  *
@@ -7,10 +8,11 @@
  * Do not edit or add to this file if you wish correct extension functionality.
  * If you wish to customize it, please contact Celebros.
  *
- ******************************************************************************
+ * *****************************************************************************
  * @category    Celebros
  * @package     Celebros_Main
  */
+
 namespace Celebros\Main\Plugin\Csp\Model\Collector;
 
 use Magento\Csp\Model\Policy\FetchPolicy;
@@ -22,7 +24,7 @@ class CspWhitelistXmlCollector
      * @var \Celebros\Main\Helper\Data
      */
     protected $helper;
-    
+
     /**
      * @param \Celebros\Main\Helper\Data $helper
      * @return void
@@ -41,15 +43,14 @@ class CspWhitelistXmlCollector
     public function afterCollect(\Magento\Csp\Model\Collector\CspWhitelistXmlCollector $collector, $policies)
     {
         if (!empty($this->helper->collectCSPUrls())) {
-//print_r($this->helper->collectCSPUrls());    
             foreach ($this->helper->collectCSPUrls() as $type => $urls) {
                 $policies[] = $this->createNewPolicy($urls, $type);
             }
         }
-//die;
+
         return $policies;
     }
-    
+
     /**
      * Create new policy object
      *
@@ -60,7 +61,7 @@ class CspWhitelistXmlCollector
     protected function createNewPolicy(
         array $urls,
         string $type
-    ) : FetchPolicy {
+    ): FetchPolicy {
         return new FetchPolicy(
             $type,
             false,

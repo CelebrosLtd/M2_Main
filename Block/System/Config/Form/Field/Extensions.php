@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Celebros
  *
@@ -7,18 +8,20 @@
  * Do not edit or add to this file if you wish correct extension functionality.
  * If you wish to customize it, please contact Celebros.
  *
- ******************************************************************************
  * @category    Celebros
  * @package     Celebros_Main
  */
+
 namespace Celebros\Main\Block\System\Config\Form\Field;
+
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\Setup\ModuleContextInterface;
+
 class Extensions extends \Magento\Config\Block\System\Config\Form\Field
 {
     const MODULE_NAME = 'Celebros_Main';
     protected $helper;
-    
+
     public function __construct(
         \Celebros\Main\Helper\Data $helper,
         \Magento\Framework\App\CacheInterface $cache
@@ -26,7 +29,7 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
         $this->helper = $helper;
         $this->cache = $cache;
     }
-    
+
     public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
         $expand = false;
@@ -43,7 +46,8 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
                     $versions .= '<div class="release-item expand" onclick="expandReleases(this)"><div> </div><span>' . __('more versions') .'</span></div></div>';
                 }
 
-                $last = array_key_last($releases);
+                end($releases);
+                $last = key($releases);
                 foreach ((array)$releases as $key => $r) {
                     $class = ($last == $key) ? ' last' : ' hidden';
                     $rel = ($r['status'] == 'Critical') ? 'critical' : 'stable';
@@ -51,21 +55,21 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
                     $versions .= '<div class="release-item' . $class . '"><div>' . $r['version'] . '</div><div class="release-status ' . strtolower($r['status']) . '"><span>' . __($r['status']) . '</span></div><a target="_blank" href="' . $r['url'] .'"><div class="github-link"><span>github</span></div></a>' . $releaseText .'</div>';
                 }
             }
-            
+
             $html .= '<tr id="row_' . $id . '">';
             $html .= '<td class="label">' . str_replace("Celebros_", " ", $module['name']) . '</td><td class="value"><span style="float:left;">' . $versions . '</span></td><td class="scope-label"></td>';
             $html .= '</tr>';
         }
 
-        if ($expand) {        
-            $html .= '<script>function expandReleases(obj) { jQuery(obj).parent().parent().find(".hidden").removeClass("hidden"); jQuery(obj).addClass("hidden"); }</script>';        
+        if ($expand) {
+            $html .= '<script>function expandReleases(obj) { jQuery(obj).parent().parent().find(".hidden").removeClass("hidden"); jQuery(obj).addClass("hidden"); }</script>';
         }
-        
+
         return $html;
     }
 
     public function getCelebrosModules()
     {
-        return $this->helper->getCelebrosModules();       
+        return $this->helper->getCelebrosModules();
     }
 }
