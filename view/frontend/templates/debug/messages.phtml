@@ -1,0 +1,9 @@
+<?php
+/** @var $viewModel \Celebros\Main\ViewModel\Debug\Messages */
+$viewModel = $block->getViewModel();
+if ($viewModel->isDebugEnabled()): 
+?>
+<div id="celebros-debug-messages" style="display:none;">
+<?php print_r($viewModel->getMessages()); ?>
+</div>
+<?php endif; ?>
