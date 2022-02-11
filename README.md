@@ -11,3 +11,5 @@ Celebros Main - Base Module
 0.9.11 - php 7.4.x has been added to require dependency, new repositories has been added, the issue with CSP has been fixed
 
 0.9.12 - technical fixes && code refactoring
+
+0.9.13 - SSUITE-787: Change debug messages output
