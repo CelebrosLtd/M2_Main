@@ -52,6 +52,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     ];
 
     protected $celebrosModules = [];
+    
+    protected $debugModules = [];
 
     protected $cspXmlPaths = [
         \Celebros\AutoComplete\Helper\Data::XML_PATH_SCRIPT_SERVER_ADDRESS => ['script-src', 'style-src'],
@@ -71,11 +73,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         Context $context,
         \Magento\Framework\App\CacheInterface $cache,
         \Magento\Framework\Module\Dir\Reader $moduleReader,
-        \Magento\Framework\Json\Helper\Data $jsonHelper
+        \Magento\Framework\Json\Helper\Data $jsonHelper,
+        array $debugModules = []
     ) {
         $this->cache = $cache;
         $this->moduleReader = $moduleReader;
         $this->jsonHelper = $jsonHelper;
+        $this->debugModules = $debugModules;
         parent::__construct($context);
     }
 
@@ -243,5 +247,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         } else {
             $urls[$type][] = $url;
         }
+    }
+    
+    public function isDebugEnabled($store = null): bool
+    {
+        $status = false;
+        foreach ($this->debugModules as $debugConfigPath) {
+            $status = $status || $this->scopeConfig->getValue(
+                $debugConfigPath,
+                ScopeInterface::SCOPE_STORE,
+                $store
+            );
+        }
+
+        return $status;
     }
 }
