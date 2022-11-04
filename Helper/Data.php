@@ -1,16 +1,12 @@
 <?php
 
 /**
- * Celebros
+ * Celebros (C) 2022. All Rights Reserved.
  *
  * DISCLAIMER
  *
  * Do not edit or add to this file if you wish correct extension functionality.
  * If you wish to customize it, please contact Celebros.
- *
- * *****************************************************************************
- * @category    Celebros
- * @package     Celebros_Main
  */
 
 namespace Celebros\Main\Helper;
@@ -52,7 +48,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     ];
 
     protected $celebrosModules = [];
-    
+
     protected $debugModules = [];
 
     protected $cspXmlPaths = [
@@ -248,7 +244,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $urls[$type][] = $url;
         }
     }
-    
+
     public function isDebugEnabled($store = null): bool
     {
         $status = false;

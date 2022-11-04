@@ -1,3 +1,12 @@
+/*
+ * Celebros (C) 2022. All Rights Reserved.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish correct extension functionality.
+ * If you wish to customize it, please contact Celebros.
+ */
+
 .config-nav-block.celebros-tab strong::before {
     background: url(../images/celebros-tab-logo.png) no-repeat;
     width: 366px;
@@ -47,7 +56,7 @@
     font-family: 'Admin Icons';
     left: 1.1rem;
     margin-top: -1.1rem;
-    top: 50%;   
+    top: 50%;
 }
 .release-item .release-status span {
     margin-left: 6px;
