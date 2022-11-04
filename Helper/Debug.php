@@ -1,16 +1,12 @@
 <?php
 
 /**
- * Celebros
+ * Celebros (C) 2022. All Rights Reserved.
  *
  * DISCLAIMER
  *
  * Do not edit or add to this file if you wish correct extension functionality.
  * If you wish to customize it, please contact Celebros.
- *
- * *****************************************************************************
- * @category    Celebros
- * @package     Celebros_Main
  */
 
 namespace Celebros\Main\Helper;
@@ -22,7 +18,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 class Debug extends AbstractHelper
 {
     protected $messages = [];
-    
+
     protected $debugModules = [];
 
     public function __construct(
@@ -32,7 +28,7 @@ class Debug extends AbstractHelper
         $this->debugModules = $debugModules;
         parent::__construct($context);
     }
-    
+
     public function isEnabled($store = null): bool
     {
         $status = false;
@@ -46,12 +42,12 @@ class Debug extends AbstractHelper
 
         return $status && !empty($this->messages);
     }
-    
+
     public function addMessage(string $message): void
     {
         $this->messages[] = $message;
     }
-    
+
     public function getMessages(): array
     {
         return $this->messages;
