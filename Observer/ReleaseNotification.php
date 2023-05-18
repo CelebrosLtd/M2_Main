@@ -73,8 +73,8 @@ class ReleaseNotification implements ObserverInterface
     public function extractReleaseShortDescription(string $releaseBody): string
     {
         foreach ($this->_releaseDescrRSymbols as $symb) {
-            if (strpos($releaseBody, $symb) !== false) {
-                $releaseBody = substr($releaseBody, 0, strpos($releaseBody, $symb));
+            if (strpos($releaseBody, (string) $symb) !== false) {
+                $releaseBody = substr($releaseBody, 0, strpos($releaseBody, (string) $symb));
             }
         }
 
@@ -144,7 +144,7 @@ class ReleaseNotification implements ObserverInterface
             $data = HttpResponse::fromString($curlClient->read());
             $curlClient->close();
 
-            $this->latestRelease = json_decode($data->getContent());
+            $this->latestRelease = json_decode((string) $data->getContent());
         } catch (\Exception $e) {
             return false;
         }

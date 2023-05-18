@@ -50,7 +50,7 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
         $id = $element->getHtmlId();
         foreach ($this->helper->getCelebrosModules() as $module) {
             $version = $this->cache->load($module['name'] . '_Last_Release');
-            $releases = json_decode($this->cache->load($module['name'] . '_releases'), true);
+            $releases = json_decode((string) $this->cache->load($module['name'] . '_releases'), true);
             $versions = '<div class="release-item installed"><div>' . $module['setup_version'] . '</div><div class="release-status current"><span>' . __('Installed') .'</span></div></div></div>';
             if (is_array($releases) && !empty($releases)) {
                 $releases = array_reverse($releases);
@@ -65,12 +65,12 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
                     $class = ($last == $key) ? ' last' : ' hidden';
                     $rel = ($r['status'] == 'Critical') ? 'critical' : 'stable';
                     $releaseText = ($last == $key) ? '<div class="release-comment">'. __('Most recent %1 release', __($rel)) . '</div>' : '';
-                    $versions .= '<div class="release-item' . $class . '"><div>' . $r['version'] . '</div><div class="release-status ' . strtolower($r['status']) . '"><span>' . __($r['status']) . '</span></div><a target="_blank" href="' . $r['url'] .'"><div class="github-link"><span>github</span></div></a>' . $releaseText .'</div>';
+                    $versions .= '<div class="release-item' . $class . '"><div>' . $r['version'] . '</div><div class="release-status ' . strtolower((string) $r['status']) . '"><span>' . __($r['status']) . '</span></div><a target="_blank" href="' . $r['url'] .'"><div class="github-link"><span>github</span></div></a>' . $releaseText .'</div>';
                 }
             }
 
             $html .= '<tr id="row_' . $id . '">';
-            $html .= '<td class="label">' . str_replace("Celebros_", " ", $module['name']) . '</td><td class="value"><span style="float:left;">' . $versions . '</span></td><td class="scope-label"></td>';
+            $html .= '<td class="label">' . str_replace("Celebros_", " ", (string) $module['name']) . '</td><td class="value"><span style="float:left;">' . $versions . '</span></td><td class="scope-label"></td>';
             $html .= '</tr>';
         }
 

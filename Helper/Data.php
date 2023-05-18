@@ -102,7 +102,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (empty($this->celebrosModules)) {
             $result = [];
             foreach ($this->moduleReader->getComposerJsonFiles() as $json) {
-                if (strpos($json, 'Celebros') !== false) {
+                if (strpos((string) $json, 'Celebros') !== false) {
                     $moduleData = $this->jsonHelper->jsonDecode($json);
                     if (isset($moduleData['name'])) {
                         $item = [
@@ -137,7 +137,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $cVersion = $this->getCurrentVersion($packageName);
         $location = isset($this->githubApi[$packageName]) ? (string)$this->githubApi[$packageName] : null;
         if ($location) {
-            $data = json_decode($this->getData($location));
+            $data = json_decode((string) $this->getData($location));
             $newReleases = [];
             foreach ((array)$data as $release) {
                 if (is_object($release)
@@ -166,7 +166,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected function _extractRelStatus($string)
     {
         foreach ($this->releaseStatuses as $status) {
-            if (strpos($string, $status) !== false) {
+            if (strpos((string) $string, (string) $status) !== false) {
                 return $status;
             }
         }
