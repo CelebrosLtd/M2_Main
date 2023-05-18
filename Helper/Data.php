@@ -15,9 +15,9 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Catalog\Model\Category;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\Message\MessageInterface as MessageInterface;
-use Zend\Http\Client\Adapter\Curl;
-use Zend\Http\Response as HttpResponse;
-use Zend\Uri\Http as HttpUri;
+use Laminas\Http\Client\Adapter\Curl;
+use Laminas\Http\Response as HttpResponse;
+use Laminas\Uri\Http as HttpUri;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -74,25 +74,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $moduleReader;
 
     /**
-     * @var \Magento\Framework\Json\Helper\Data
+     * @var \Magento\Framework\Serialize\Serializer\Json
      */
-    private $jsonHelper;
+    private $json;
 
     /**
      * @var array
      */
     private $debugModules = [];
 
+    /**
+     * @param Context $context
+     * @param \Magento\Framework\App\CacheInterface $cache
+     * @param \Magento\Framework\Module\Dir\Reader $moduleReader
+     * @param \Magento\Framework\Serialize\Serializer\Json $json
+     * @param array $debugModules
+     */
     public function __construct(
         Context $context,
         \Magento\Framework\App\CacheInterface $cache,
         \Magento\Framework\Module\Dir\Reader $moduleReader,
-        \Magento\Framework\Json\Helper\Data $jsonHelper,
+        \Magento\Framework\Serialize\Serializer\Json $json,
         array $debugModules = []
     ) {
         $this->cache = $cache;
         $this->moduleReader = $moduleReader;
-        $this->jsonHelper = $jsonHelper;
+        $this->json = $json;
         $this->debugModules = $debugModules;
         parent::__construct($context);
     }
@@ -103,7 +110,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = [];
             foreach ($this->moduleReader->getComposerJsonFiles() as $json) {
                 if (strpos((string) $json, 'Celebros') !== false) {
-                    $moduleData = $this->jsonHelper->jsonDecode($json);
+                    $moduleData = $this->json->unserialize($json);
                     if (isset($moduleData['name'])) {
                         $item = [
                             'name' => $moduleData['name'],
@@ -137,7 +144,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $cVersion = $this->getCurrentVersion($packageName);
         $location = isset($this->githubApi[$packageName]) ? (string)$this->githubApi[$packageName] : null;
         if ($location) {
-            $data = json_decode((string) $this->getData($location));
+            $data = $this->json->unserialize($this->getData($location));
             $newReleases = [];
             foreach ((array)$data as $release) {
                 if (is_object($release)
@@ -154,7 +161,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
 
             if (!empty($newReleases)) {
-                $cacheData = (string)json_encode($newReleases);
+                $cacheData = (string)$this->json->serialize($newReleases);
             } else {
                 $cacheData =  false;
             }
@@ -174,7 +181,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->releaseStatuses[2];
     }
 
-    protected function getData($location)
+    public function getData($location)
     {
         try {
             $curlClient = new Curl();
