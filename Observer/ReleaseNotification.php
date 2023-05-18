@@ -19,6 +19,11 @@ use Zend\Uri\Http as HttpUri;
 
 class ReleaseNotification implements ObserverInterface
 {
+    /**
+     * @var \stdClass
+     */
+    private $latestRelease;
+
     public const MODULE_NAME = 'Celebros_Main';
     public const CACHE_POSTFIX = '_Last_Release';
 
@@ -80,11 +85,12 @@ class ReleaseNotification implements ObserverInterface
     {
         $newNotification = true;
         $this->helper->collectNewReleases($module['name']);
-        $version = $this->helper->getLatestRelease($this->githubApi[$module['name']]);
+        $release = $this->getLatestRelease($this->githubApi[$module['name']]);
+        $version = $release instanceof \stdClass ? $release->tag_name : false;
         if ($version) {
             $notifications = $this->_notification
                 ->getCollection()
-                ->addFieldToFilter('url', $this->helper->lRelease->html_url)
+                ->addFieldToFilter('url', $release->html_url)
                 ->addFieldToFilter('is_remove', 0);
 
             foreach ($notifications as $notification) {
@@ -99,9 +105,9 @@ class ReleaseNotification implements ObserverInterface
         if ($version && !version_compare($module['setup_version'], $version, '=')) {
             if ($newNotification) {
                 $this->_notification->addCritical(
-                    $this->extractReleaseShortDescription($this->helper->lRelease->body) . ' is available',
+                    $this->extractReleaseShortDescription($release->body) . ' is available',
                     __('celebros_main::NOTIFICATION_TEXT'),
-                    $this->helper->lRelease->html_url
+                    $release->html_url
                 );
             }
 
@@ -118,12 +124,10 @@ class ReleaseNotification implements ObserverInterface
 
     protected function getLatestRelease($location = null)
     {
-        $version = null;
         try {
             $curlClient = new Curl();
-            if (!$location) {
-                return false;
-            }
+
+            $location .= '/latest';
 
             $uri = new HttpUri($location);
             $curlClient->setOptions([
@@ -140,13 +144,11 @@ class ReleaseNotification implements ObserverInterface
             $data = HttpResponse::fromString($curlClient->read());
             $curlClient->close();
 
-            $this->lRelease = json_decode($data->getContent());
-
-            $version = $this->lRelease->tag_name;
+            $this->latestRelease = json_decode($data->getContent());
         } catch (\Exception $e) {
             return false;
         }
 
-        return $version;
+        return $this->latestRelease;
     }
 }

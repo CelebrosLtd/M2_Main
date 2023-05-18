@@ -49,8 +49,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     protected $celebrosModules = [];
 
-    protected $debugModules = [];
-
     protected $cspXmlPaths = [
         \Celebros\AutoComplete\Helper\Data::XML_PATH_SCRIPT_SERVER_ADDRESS => ['script-src', 'style-src'],
         \Celebros\AutoComplete\Helper\Data::XML_PATH_FRONTEND_SERVER_ADDRESS => 'font-src',
@@ -64,6 +62,26 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         '*.celebros-analytics.com' => 'connect-src',
         'celebrosnlp.com' => 'img-src'
     ];
+
+    /**
+     * @var \Magento\Framework\App\CacheInterface
+     */
+    private $cache;
+
+    /**
+     * @var \Magento\Framework\Module\Dir\Reader
+     */
+    private $moduleReader;
+
+    /**
+     * @var \Magento\Framework\Json\Helper\Data
+     */
+    private $jsonHelper;
+
+    /**
+     * @var array
+     */
+    private $debugModules = [];
 
     public function __construct(
         Context $context,
@@ -154,39 +172,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         return $this->releaseStatuses[2];
-    }
-
-    public function getLatestRelease($location = null)
-    {
-        $version = null;
-        try {
-            $curlClient = new Curl();
-
-            $location .= '/latest';
-
-            $uri = new HttpUri($location);
-            $curlClient->setOptions([
-                'timeout'   => 8
-            ]);
-
-            $headers = ['User-Agent' => 'CelebrosLtd'];
-            $curlClient->connect(
-                $uri->getHost(),
-                $uri->getPort()
-            );
-
-            $curlClient->write('GET', $uri, 1.0, $headers);
-            $data = HttpResponse::fromString($curlClient->read());
-            $curlClient->close();
-
-            $this->lRelease = json_decode($data->getContent());
-
-            $version = $this->lRelease->tag_name;
-        } catch (\Exception $e) {
-            return false;
-        }
-
-        return $version;
     }
 
     protected function getData($location)
