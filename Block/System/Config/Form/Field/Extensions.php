@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Celebros (C) 2022. All Rights Reserved.
+ * Celebros (C) 2023. All Rights Reserved.
  *
  * DISCLAIMER
  *
@@ -16,9 +16,22 @@ use Magento\Framework\Setup\ModuleContextInterface;
 
 class Extensions extends \Magento\Config\Block\System\Config\Form\Field
 {
-    const MODULE_NAME = 'Celebros_Main';
-    protected $helper;
+    public const MODULE_NAME = 'Celebros_Main';
 
+    /**
+     * @var \Celebros\Main\Helper\Data
+     */
+    private $helper;
+
+    /**
+     * @var \Magento\Framework\App\CacheInterface
+     */
+    private $cache;
+
+    /**
+     * @param \Celebros\Main\Helper\Data $helper
+     * @param \Magento\Framework\App\CacheInterface $cache
+     */
     public function __construct(
         \Celebros\Main\Helper\Data $helper,
         \Magento\Framework\App\CacheInterface $cache
@@ -27,14 +40,17 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
         $this->cache = $cache;
     }
 
-    public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    /**
+     * @inheritDoc
+     */
+    public function render(AbstractElement $element)
     {
         $expand = false;
         $html = '';
         $id = $element->getHtmlId();
-        foreach ($this->getCelebrosModules() as $module) {
+        foreach ($this->helper->getCelebrosModules() as $module) {
             $version = $this->cache->load($module['name'] . '_Last_Release');
-            $releases = json_decode($this->cache->load($module['name'] . '_releases'), true);
+            $releases = json_decode((string) $this->cache->load($module['name'] . '_releases'), true);
             $versions = '<div class="release-item installed"><div>' . $module['setup_version'] . '</div><div class="release-status current"><span>' . __('Installed') .'</span></div></div></div>';
             if (is_array($releases) && !empty($releases)) {
                 $releases = array_reverse($releases);
@@ -49,12 +65,12 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
                     $class = ($last == $key) ? ' last' : ' hidden';
                     $rel = ($r['status'] == 'Critical') ? 'critical' : 'stable';
                     $releaseText = ($last == $key) ? '<div class="release-comment">'. __('Most recent %1 release', __($rel)) . '</div>' : '';
-                    $versions .= '<div class="release-item' . $class . '"><div>' . $r['version'] . '</div><div class="release-status ' . strtolower($r['status']) . '"><span>' . __($r['status']) . '</span></div><a target="_blank" href="' . $r['url'] .'"><div class="github-link"><span>github</span></div></a>' . $releaseText .'</div>';
+                    $versions .= '<div class="release-item' . $class . '"><div>' . $r['version'] . '</div><div class="release-status ' . strtolower((string) $r['status']) . '"><span>' . __($r['status']) . '</span></div><a target="_blank" href="' . $r['url'] .'"><div class="github-link"><span>github</span></div></a>' . $releaseText .'</div>';
                 }
             }
 
             $html .= '<tr id="row_' . $id . '">';
-            $html .= '<td class="label">' . str_replace("Celebros_", " ", $module['name']) . '</td><td class="value"><span style="float:left;">' . $versions . '</span></td><td class="scope-label"></td>';
+            $html .= '<td class="label">' . str_replace("Celebros_", " ", (string) $module['name']) . '</td><td class="value"><span style="float:left;">' . $versions . '</span></td><td class="scope-label"></td>';
             $html .= '</tr>';
         }
 
@@ -63,10 +79,5 @@ class Extensions extends \Magento\Config\Block\System\Config\Form\Field
         }
 
         return $html;
-    }
-
-    public function getCelebrosModules()
-    {
-        return $this->helper->getCelebrosModules();
     }
 }
