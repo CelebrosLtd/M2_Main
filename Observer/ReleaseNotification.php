@@ -152,7 +152,7 @@ class ReleaseNotification implements ObserverInterface
     {
         $location .= '/latest';
         try {
-            $this->latestRelease = $this->json->unserialize($this->helper->getData());
+            $this->latestRelease = $this->json->unserialize($this->helper->getData($location));
         } catch (\Exception $e) {
             return false;
         }
