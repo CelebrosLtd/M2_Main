@@ -15,9 +15,9 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Catalog\Model\Category;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\Message\MessageInterface as MessageInterface;
-use Zend\Http\Client\Adapter\Curl;
-use Zend\Http\Response as HttpResponse;
-use Zend\Uri\Http as HttpUri;
+use Laminas\Http\Client\Adapter\Curl;
+use Laminas\Http\Response as HttpResponse;
+use Laminas\Uri\Http as HttpUri;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -49,8 +49,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     protected $celebrosModules = [];
 
-    protected $debugModules = [];
-
     protected $cspXmlPaths = [
         \Celebros\AutoComplete\Helper\Data::XML_PATH_SCRIPT_SERVER_ADDRESS => ['script-src', 'style-src'],
         \Celebros\AutoComplete\Helper\Data::XML_PATH_FRONTEND_SERVER_ADDRESS => 'font-src',
@@ -65,16 +63,43 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         'celebrosnlp.com' => 'img-src'
     ];
 
+    /**
+     * @var \Magento\Framework\App\CacheInterface
+     */
+    private $cache;
+
+    /**
+     * @var \Magento\Framework\Module\Dir\Reader
+     */
+    private $moduleReader;
+
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    private $json;
+
+    /**
+     * @var array
+     */
+    private $debugModules = [];
+
+    /**
+     * @param Context $context
+     * @param \Magento\Framework\App\CacheInterface $cache
+     * @param \Magento\Framework\Module\Dir\Reader $moduleReader
+     * @param \Magento\Framework\Serialize\Serializer\Json $json
+     * @param array $debugModules
+     */
     public function __construct(
         Context $context,
         \Magento\Framework\App\CacheInterface $cache,
         \Magento\Framework\Module\Dir\Reader $moduleReader,
-        \Magento\Framework\Json\Helper\Data $jsonHelper,
+        \Magento\Framework\Serialize\Serializer\Json $json,
         array $debugModules = []
     ) {
         $this->cache = $cache;
         $this->moduleReader = $moduleReader;
-        $this->jsonHelper = $jsonHelper;
+        $this->json = $json;
         $this->debugModules = $debugModules;
         parent::__construct($context);
     }
@@ -84,8 +109,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (empty($this->celebrosModules)) {
             $result = [];
             foreach ($this->moduleReader->getComposerJsonFiles() as $json) {
-                if (strpos($json, 'Celebros') !== false) {
-                    $moduleData = $this->jsonHelper->jsonDecode($json);
+                if (strpos((string) $json, 'Celebros') !== false) {
+                    $moduleData = $this->json->unserialize($json);
                     if (isset($moduleData['name'])) {
                         $item = [
                             'name' => $moduleData['name'],
@@ -119,7 +144,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $cVersion = $this->getCurrentVersion($packageName);
         $location = isset($this->githubApi[$packageName]) ? (string)$this->githubApi[$packageName] : null;
         if ($location) {
-            $data = json_decode($this->getData($location));
+            $data = $this->json->unserialize($this->getData($location));
             $newReleases = [];
             foreach ((array)$data as $release) {
                 if (is_object($release)
@@ -136,7 +161,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
 
             if (!empty($newReleases)) {
-                $cacheData = (string)json_encode($newReleases);
+                $cacheData = (string)$this->json->serialize($newReleases);
             } else {
                 $cacheData =  false;
             }
@@ -148,7 +173,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected function _extractRelStatus($string)
     {
         foreach ($this->releaseStatuses as $status) {
-            if (strpos($string, $status) !== false) {
+            if (strpos((string) $string, (string) $status) !== false) {
                 return $status;
             }
         }
@@ -156,40 +181,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->releaseStatuses[2];
     }
 
-    public function getLatestRelease($location = null)
-    {
-        $version = null;
-        try {
-            $curlClient = new Curl();
-
-            $location .= '/latest';
-
-            $uri = new HttpUri($location);
-            $curlClient->setOptions([
-                'timeout'   => 8
-            ]);
-
-            $headers = ['User-Agent' => 'CelebrosLtd'];
-            $curlClient->connect(
-                $uri->getHost(),
-                $uri->getPort()
-            );
-
-            $curlClient->write('GET', $uri, 1.0, $headers);
-            $data = HttpResponse::fromString($curlClient->read());
-            $curlClient->close();
-
-            $this->lRelease = json_decode($data->getContent());
-
-            $version = $this->lRelease->tag_name;
-        } catch (\Exception $e) {
-            return false;
-        }
-
-        return $version;
-    }
-
-    protected function getData($location)
+    public function getData($location)
     {
         try {
             $curlClient = new Curl();

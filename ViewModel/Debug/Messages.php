@@ -16,10 +16,15 @@ use Celebros\Main\Helper\Debug;
 
 class Messages implements ArgumentInterface
 {
-    protected $messages = [];
+    /**
+     * @var Debug
+     */
+    private $helper;
 
     /**
-     * @param Data $helper
+     * Messages constructor
+     *
+     * @param Debug $helper
      * @return void
      */
     public function __construct(
@@ -28,11 +33,21 @@ class Messages implements ArgumentInterface
         $this->helper = $helper;
     }
 
+    /**
+     * If debug is enabled
+     *
+     * @return bool
+     */
     public function isDebugEnabled(): bool
     {
         return $this->helper->isEnabled();
     }
 
+    /**
+     * Get debug messages
+     *
+     * @return array
+     */
     public function getMessages()
     {
         return $this->helper->getMessages();
