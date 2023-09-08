@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.9.15
+
+### UPDATES
+
+- Add Magento 2.4.6 and PHP 8.2 compatibility in https://github.com/CelebrosLtd/M2_Main/pull/3
+- fix: missed $location attribute in https://github.com/CelebrosLtd/M2_Main/pull/4
+- fix: Add missing dynamic properties PHP 8.2
+- fix: Change null to strict string defined function call PHP 8.1 
+- fix: replace Zend_HTTP with laminas-http
+
+
 ## 0.9.14
 
 ### UPDATES

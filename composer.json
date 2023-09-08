@@ -2,13 +2,13 @@
     "name": "celebros/module-main",
     "description": "Celebros Main",
     "type": "magento2-module",
-    "version": "0.9.14",
+    "version": "0.9.15",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
     ],
     "require": {
-        "php": "~7.3|~7.4|~8.0|~8.1"
+        "php": "~7.3|~7.4|~8.0|~8.1|~8.2"
     },
     "autoload": {
         "files": [ "registration.php" ],
